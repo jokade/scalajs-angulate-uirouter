@@ -406,7 +406,7 @@ object State {
            controllerProvider: js.Function = null,
            resolve: js.Dictionary[js.Any] = null,
            params: js.Dictionary[js.Any] = null,
-           views: Map[String, View] = Map.empty,
+           views: Map[String, View] = null,
            onEnter: AnnotatedFunction = none,
            onExit: AnnotatedFunction = none,
            reloadOnSearch: Boolean = true,
