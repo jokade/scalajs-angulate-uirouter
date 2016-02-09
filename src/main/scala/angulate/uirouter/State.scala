@@ -2,6 +2,7 @@ package angulate.uirouter
 
 import biz.enef.angulate.AnnotatedFunction
 import biz.enef.angulate.core.{ProvidedService, QPromise}
+import de.surfice.smacrotools.JSOptionsObject
 
 import scala.scalajs.js
 import scala.scalajs.js.annotation.{JSName, JSBracketAccess}
@@ -393,7 +394,7 @@ object State {
 
   private[this] val none = new AnnotatedFunction(js.Array())
 
-  def apply(url: String, isAbstract: Boolean = false,
+  def apply(url: String = null, isAbstract: Boolean = false,
            template: String = null,
            templateFn: js.Function1[js.Object, String] = null,
            templateUrl: String = null,
@@ -436,7 +437,9 @@ object State {
            reloadOnSearch: Boolean = true,
            data: T = null): TypedState[T] = {
 
-    val out = literal(url = url)
+    val out = literal()
+    if(url != null)
+      out.url = url
     if (isAbstract) out.`abstract` = true
 
     if (template != null) out.template = template
@@ -459,58 +462,31 @@ object State {
     if (!reloadOnSearch) out.reloadOnSearch = reloadOnSearch
     if (data != null) out.data = data
 
-    js.Dynamic.global.console.log(out)
+    //js.Dynamic.global.console.log(out)
 
     out.asInstanceOf[TypedState[T]]
   }
 
 }
 
-trait StateOptions extends js.Object {
+/**
+ *
+ * @param location If `true` will update the url in the location bar, if `false`
+ *                 will not. If string, must be `"replace"`, which will update url and also replace last history record.
+ * @param inherit If `true` will inherit url parameters from current url.
+ * @param relative  When transitioning with relative path (e.g '{{{^}}}'), defines which state to be relative from.
+ * @param notifyChanges If `true` will broadcast \$stateChangeStart and \$stateChangeSuccess events.
+ * @param reload If `true` will force transition even if the state or params
+ *               have not changed, aka a reload of the same state. It differs from reloadOnSearch because you'd
+ *               use this when you want to force a reload when *everything* is the same, including search params.
+ */
+@JSOptionsObject
+case class StateOptions(location: js.UndefOr[js.Any] = js.undefined,
+                        inherit: js.UndefOr[Boolean] = js.undefined,
+                        relative: js.UndefOr[State]  = js.undefined,
+                        @JSName("notify") notifyChanges: js.UndefOr[Boolean]  = js.undefined,
+                        reload: js.UndefOr[Boolean] = js.undefined)
 
-  /**
-   * {boolean=true|string=} - If `true` will update the url in the location bar, if `false`
-   * will not. If string, must be `"replace"`, which will update url and also replace last history record.
-   */
-  var location: js.Any = js.native
-
-  /**
-   * {boolean=true}, If `true` will inherit url parameters from current url.
-   */
-  var inherit: Boolean = js.native
-
-  /**
-   * {object=\$state.\$current}, When transitioning with relative path (e.g '{{{^}}}'),
-   *    defines which state to be relative from.
-   */
-  var relative: State = js.native
-
-  /**
-   * {boolean=true}, If `true` will broadcast \$stateChangeStart and \$stateChangeSuccess events.
-   */
-  @JSName("notify") var notifyStateChanges: Boolean = js.native
-
-  /**
-   * (v0.2.5) - {boolean=false}, If `true` will force transition even if the state or params
-   * have not changed, aka a reload of the same state. It differs from reloadOnSearch because you'd
-   * use this when you want to force a reload when *everything* is the same, including search params.
-   */
-  var reload: Boolean = js.native
-}
-
-object StateOptions {
-
-  import js.Dynamic.literal
-
-  def apply(location: Boolean = true, locationStr: String = "", inherit: Boolean = true,
-             relative: State = null, notify : Boolean = true, reload : Boolean = false): StateOptions = {
-
-    val out = literal(location = location, inherit = inherit, relative = relative, notify = notify, reload = reload).asInstanceOf[StateOptions]
-
-    if (locationStr != "") out.location = locationStr
-    out
-  }
-}
 
 trait CheckStateOptions extends js.Object {
 
